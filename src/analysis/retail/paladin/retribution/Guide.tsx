@@ -149,6 +149,8 @@ function CooldownSection({ modules, info }: GuideProps<typeof CombatLogParser>) 
       {info.combatant.hasTalent(TALENTS.RADIANT_GLORY_TALENT) && (
         <CooldownUsage analyzer={modules.wakeofAshes} title="Wake of Ashes" />
       )}
+      {info.combatant.hasTalent(TALENTS.EXECUTION_SENTENCE_TALENT) &&
+        modules.executionSentence.guideSubsection}
     </Section>
   );
 }
