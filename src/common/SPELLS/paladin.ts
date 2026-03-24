@@ -399,6 +399,11 @@ const spells = {
     name: 'Execution Sentence',
     icon: 'spell_paladin_executionsentence',
   },
+  EXECUTION_SENTENCE_BUFF: {
+    id: 1234189,
+    name: 'Execution Sentence',
+    icon: 'spell_paladin_executionsentence',
+  },
   CRUSADE: {
     id: 454373,
     name: 'Crusade',
