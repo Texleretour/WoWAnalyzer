@@ -35,15 +35,14 @@ class CombatLogParser extends CoreCombatLogParser {
   static guide = Guide;
 
   static specModules = {
+    // Normalizers
+    wakeOfAshesNormalizer: WakeOfAshesNormalizer,
+
     // Core
     builderUse: BuilderUse,
-
     instrumentOfRetribution: InstrumentOfRetribution,
     artOfWar: ArtOfWar,
     artOfWarProbability: ArtOfWarProbability,
-
-    // Normalizers
-    wakeOfAshesNormalizer: WakeOfAshesNormalizer,
 
     // Features
     abilities: Abilities,
@@ -56,13 +55,13 @@ class CombatLogParser extends CoreCombatLogParser {
     judgment: Judgment,
 
     // Talents
+    executionSentence: ExecutionSentence,
     divinePurpose: DivinePurpose,
     crusade: Crusade,
     wakeofAshes: WakeOfAshes,
     hammerofWrath: HammerOfWrath,
     empyreanPower: EmpyreanPower,
     expurgation: Expurgation,
-    executionSentence: ExecutionSentence,
     lightBearer: Lightbearer,
 
     // HolyPower

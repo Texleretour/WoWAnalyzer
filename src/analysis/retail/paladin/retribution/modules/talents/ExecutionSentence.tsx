@@ -1,48 +1,47 @@
-import items from 'common/ITEMS/deathknight';
 import SPELLS from 'common/SPELLS';
 import { TALENTS_PALADIN } from 'common/TALENTS';
 import { CastDetail, CastInSequence, GuideSection, PerCastData } from 'interface/guide/components';
 import { SpellSequence } from 'interface/guide/components/CastSequence';
 import SpellLink from 'interface/SpellLink';
-import { spellName } from 'interface/Table/ThroughputTable';
 import Analyzer, { Options, SELECTED_PLAYER } from 'parser/core/Analyzer';
 import Events, {
-  AnyEvent,
   CastEvent,
-  DamageEvent,
-  EventType,
   FightEndEvent,
   GlobalCooldownEvent,
   RemoveBuffEvent,
 } from 'parser/core/Events';
-import MajorCooldown, { CooldownTrigger } from 'parser/core/MajorCooldowns/MajorCooldown';
-import { ChecklistUsageInfo, SpellUse } from 'parser/core/SpellUsage/core';
 import {
   evaluateQualitativePerformanceByThreshold,
   getLowestPerf,
   QualitativePerformance,
 } from 'parser/ui/QualitativePerformance';
-import { ReactNode } from 'react';
+import { JSX } from 'react';
 
-interface ExecutionSentenceTimeline {
-  start: number;
-  end?: number | null;
-  events: AnyEvent[];
+interface ExecutionSentenceWindowBreakdown {
+  unusedGlobalCooldowns: number;
+  gcdPerformance: QualitativePerformance;
+  performance: QualitativePerformance;
+  sequence: CastInSequence[];
 }
-interface ExecutionSentenceCooldownCast extends CooldownTrigger<CastEvent> {
+
+interface ExecutionSentenceWindow {
+  event: CastEvent;
+  castEvents: CastEvent[];
   globalCooldowns: number[];
   unusedGcdTime: number;
-  timeline: ExecutionSentenceTimeline;
+  start: number;
+  end?: number | null;
 }
 
-const GCD_TOLERANCE = 25;
+class ExecutionSentence extends Analyzer {
+  private static readonly GCD_TOLERANCE = 25;
 
-class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
-  #activeWindow: ExecutionSentenceCooldownCast | null = null;
+  #activeWindow: ExecutionSentenceWindow | null = null;
+  #windows: ExecutionSentenceWindow[] = [];
   #globalCooldownEnds = 0;
 
   constructor(options: Options) {
-    super({ spell: TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT }, options);
+    super(options);
 
     this.active = this.selectedCombatant.hasTalent(TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT);
 
@@ -63,12 +62,10 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
   #onExecutionSentenceCast(event: CastEvent) {
     this.#activeWindow = {
       event: event,
+      castEvents: [],
       globalCooldowns: [],
-      timeline: {
-        start: Math.max(event.timestamp, this.#globalCooldownEnds),
-        events: [],
-      },
       unusedGcdTime: 0,
+      start: Math.max(event.timestamp, this.#globalCooldownEnds),
     };
   }
 
@@ -76,9 +73,10 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
     if (!this.#activeWindow) {
       return;
     }
-    this.#activeWindow.timeline.end = event.timestamp;
 
-    this.recordCooldown(this.#activeWindow);
+    this.#activeWindow.end = event.timestamp;
+
+    this.#windows.push(this.#activeWindow);
     this.#activeWindow = null;
   }
 
@@ -88,7 +86,7 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
     }
 
     this.#activeWindow.unusedGcdTime += Math.max(event.timestamp - this.#globalCooldownEnds, 0);
-    this.#activeWindow.timeline.events.push(event);
+    this.#activeWindow.castEvents.push(event);
   }
 
   #onGlobalCooldown(event: GlobalCooldownEvent) {
@@ -98,36 +96,36 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
     }
   }
 
-  #getAverageGcdOfWindow(cast: ExecutionSentenceCooldownCast) {
+  #getAverageGcdOfWindow(cast: ExecutionSentenceWindow) {
     return (
-      cast.globalCooldowns.reduce((t, gcdDuration) => (t += gcdDuration + GCD_TOLERANCE), 0) /
-      (cast.globalCooldowns.length ?? 1)
+      cast.globalCooldowns.reduce(
+        (total, gcdDuration) => (total += gcdDuration + ExecutionSentence.GCD_TOLERANCE),
+        0,
+      ) / (cast.globalCooldowns.length ?? 1)
     );
   }
 
-  #getUnusedGlobalCooldowns(cast: ExecutionSentenceCooldownCast) {
+  #getUnusedGlobalCooldowns(cast: ExecutionSentenceWindow) {
     const avgGcd = this.#getAverageGcdOfWindow(cast);
     return Math.max(Math.floor(cast.unusedGcdTime / avgGcd), 0);
   }
 
-  #buildSpellSequence(cast: ExecutionSentenceCooldownCast): CastInSequence[] {
-    return cast.timeline.events
-      .filter((event): event is CastEvent => event.type === EventType.Cast)
-      .map((event) => ({
-        timestamp: event.timestamp,
-        spellId: event.ability.guid,
-        spellName: event.ability.name,
-        icon: event.ability.abilityIcon.replace('.jpg', ''),
-        tooltip: (
-          <>
-            <SpellLink spell={event.ability.guid} />
-            <div>@ {this.owner.formatTimestamp(event.timestamp)}</div>
-          </>
-        ),
-      }));
+  #buildSpellSequence(cast: ExecutionSentenceWindow): CastInSequence[] {
+    return cast.castEvents.map((event) => ({
+      timestamp: event.timestamp,
+      spellId: event.ability.guid,
+      spellName: event.ability.name,
+      icon: event.ability.abilityIcon.replace('.jpg', ''),
+      tooltip: (
+        <>
+          <SpellLink spell={event.ability.guid} />
+          <div>@ {this.owner.formatTimestamp(event.timestamp)}</div>
+        </>
+      ),
+    }));
   }
 
-  description(): ReactNode {
+  #description(): JSX.Element {
     return (
       <>
         <SpellLink spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT} /> description.
@@ -135,67 +133,55 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
     );
   }
 
-  #gcdPerformance(cast: ExecutionSentenceCooldownCast): ChecklistUsageInfo {
+  #getGcdPerformance(cast: ExecutionSentenceWindow): QualitativePerformance {
     const avgGcd = this.#getAverageGcdOfWindow(cast);
     const unusedGlobalCooldowns = Math.max(Math.floor(cast.unusedGcdTime / avgGcd), 0);
-    const estimatedPotentialCasts = (cast.timeline.end! - cast.timeline.start) / avgGcd;
+    const estimatedPotentialCasts = (cast.end! - cast.start) / avgGcd;
     const gcdPerfCalc = (unusedGlobalCooldowns / estimatedPotentialCasts) * 100;
 
-    return {
-      check: 'global-cooldown',
-      timestamp: cast.event.timestamp,
-      performance: evaluateQualitativePerformanceByThreshold({
-        actual: gcdPerfCalc,
-        isLessThanOrEqual: {
-          perfect: 7.5,
-          good: 15,
-          ok: 25,
-        },
-      }),
-      details: <div>{unusedGlobalCooldowns} unused global cooldowns</div>,
-      summary: <div>gcd summarysdsd</div>,
-    };
+    return evaluateQualitativePerformanceByThreshold({
+      actual: gcdPerfCalc,
+      isLessThanOrEqual: {
+        perfect: 7.5,
+        good: 15,
+        ok: 25,
+      },
+    });
   }
 
-  explainPerformance(cast: ExecutionSentenceCooldownCast): SpellUse {
-    const checklistItems: ChecklistUsageInfo[] = [this.#gcdPerformance(cast)];
-
-    const overallPerformance =
-      checklistItems.length > 0
-        ? getLowestPerf(checklistItems.map((item) => item.performance))
-        : QualitativePerformance.Perfect;
+  #buildWindowBreakdown(window: ExecutionSentenceWindow): ExecutionSentenceWindowBreakdown {
+    const unusedGlobalCooldowns = this.#getUnusedGlobalCooldowns(window);
+    const gcdPerformance = this.#getGcdPerformance(window);
 
     return {
-      event: cast.event,
-      checklistItems: checklistItems,
-      performance: overallPerformance,
-      extraDetails: <>Extra details</>,
+      unusedGlobalCooldowns,
+      gcdPerformance,
+      performance: getLowestPerf([gcdPerformance]),
+      sequence: this.#buildSpellSequence(window),
     };
   }
 
   #buildPerCastData(): PerCastData[] {
-    return this.casts.map((cast) => {
-      const spellUse = this.explainPerformance(cast);
-      const castSequence = this.#buildSpellSequence(cast);
-      console.log('sequence', castSequence);
-      const unusedGlobalCooldowns = this.#getUnusedGlobalCooldowns(cast);
+    return this.#windows.map((window) => {
+      const breakdown = this.#buildWindowBreakdown(window);
+      console.log('breakdown', breakdown);
 
       return {
-        performance: spellUse.performance,
-        timestamp: this.owner.formatTimestamp(cast.event.timestamp),
+        performance: breakdown.performance,
+        timestamp: this.owner.formatTimestamp(window.event.timestamp),
         stats: [
           {
-            value: unusedGlobalCooldowns,
+            value: breakdown.unusedGlobalCooldowns,
             label: 'Unused GCDs',
             tooltip: <>Estimated unused global cooldowns during this window.</>,
-            performance: this.#gcdPerformance(cast).performance,
+            performance: breakdown.gcdPerformance,
           },
         ],
         additionalContent:
-          castSequence.length > 0
+          breakdown.sequence.length > 0
             ? {
                 title: 'Cast Sequence',
-                content: <SpellSequence casts={castSequence} iconSize={40} />,
+                content: <SpellSequence casts={breakdown.sequence} iconSize={40} />,
               }
             : undefined,
       };
@@ -206,7 +192,7 @@ class ExecutionSentence extends MajorCooldown<ExecutionSentenceCooldownCast> {
     return (
       <GuideSection
         spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT}
-        explanation={this.description()}
+        explanation={this.#description()}
       >
         <CastDetail title="Execution Sentence Windows" casts={this.#buildPerCastData()} />
       </GuideSection>
