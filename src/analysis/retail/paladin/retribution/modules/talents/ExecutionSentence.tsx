@@ -128,7 +128,34 @@ class ExecutionSentence extends Analyzer {
   #description(): JSX.Element {
     return (
       <>
-        <SpellLink spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT} /> description.
+        <p>
+          Use <SpellLink spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT} /> on cooldown (unless
+          holding for a damage amp or damage check) and always pair it with your other cooldowns.
+        </p>
+        <p>
+          The cooldown sequence should often be the same:
+          <div>
+            <SpellLink spell={TALENTS_PALADIN.AVENGING_WRATH_TALENT} /> &rarr;{' '}
+            <SpellLink spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT} /> &rarr;{' '}
+            <SpellLink spell={TALENTS_PALADIN.WAKE_OF_ASHES_TALENT} />
+          </div>
+        </p>
+        <p>
+          During the window, you want to be doing maximal damage by maximizing uptime and using many
+          spenders as possible.
+        </p>
+        <p>
+          This analyzer checks your <SpellLink spell={TALENTS_PALADIN.EXECUTION_SENTENCE_TALENT} />{' '}
+          performance on the following metrics:
+          <ul>
+            <li>Active time: be as close to 100% as possible.</li>
+            <li>Enough spenders used.</li>
+            <li>
+              Both <SpellLink spell={TALENTS_PALADIN.DIVINE_TOLL_TALENT} /> and{' '}
+              <SpellLink spell={SPELLS.HAMMER_OF_LIGHT} /> used.
+            </li>
+          </ul>
+        </p>
       </>
     );
   }
