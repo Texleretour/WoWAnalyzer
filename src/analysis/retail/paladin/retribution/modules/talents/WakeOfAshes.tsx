@@ -31,6 +31,8 @@ class WakeOfAshes extends MajorCooldown<WakeOfAshesCooldownCast> {
   constructor(options: Options) {
     super({ spell: TALENTS_PALADIN.WAKE_OF_ASHES_TALENT }, options);
 
+    this.active = this.selectedCombatant.hasTalent(TALENTS_PALADIN.RADIANT_GLORY_TALENT);
+
     this.addEventListener(
       Events.cast.by(SELECTED_PLAYER).spell(TALENTS_PALADIN.WAKE_OF_ASHES_TALENT),
       this.onCast,

@@ -33,9 +33,9 @@ interface ExecutionSentenceWindow {
   end?: number | null;
 }
 
-class ExecutionSentence extends Analyzer {
-  private static readonly GCD_TOLERANCE = 25;
+const GCD_TOLERANCE = 25;
 
+class ExecutionSentence extends Analyzer {
   #activeWindow: ExecutionSentenceWindow | null = null;
   #windows: ExecutionSentenceWindow[] = [];
   #globalCooldownEnds = 0;
@@ -99,7 +99,7 @@ class ExecutionSentence extends Analyzer {
   #getAverageGcdOfWindow(cast: ExecutionSentenceWindow) {
     return (
       cast.globalCooldowns.reduce(
-        (total, gcdDuration) => (total += gcdDuration + ExecutionSentence.GCD_TOLERANCE),
+        (total, gcdDuration) => (total += gcdDuration + GCD_TOLERANCE),
         0,
       ) / (cast.globalCooldowns.length ?? 1)
     );
