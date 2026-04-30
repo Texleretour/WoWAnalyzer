@@ -15,10 +15,8 @@ import ArtOfWarProbability from 'analysis/retail/paladin/retribution/modules/tal
 import BladeOfJustice from 'analysis/retail/paladin/retribution/modules/talents/BladeOfJustice';
 import CrusaderStrike from './modules/core/CrusaderStrike';
 import ShieldOfVengeance from 'analysis/retail/paladin/retribution/modules/talents/ShieldOfVengeance';
-import WakeOfAshes from 'analysis/retail/paladin/retribution/modules/talents/WakeOfAshes';
 import AlwaysBeCasting from './modules/features/AlwaysBeCasting';
 import CooldownThroughputTracker from './modules/features/CooldownThroughputTracker';
-import FinalVerdict from 'analysis/retail/paladin/retribution/modules/talents/FinalVerdict';
 import Crusade from './modules/talents/Crusade';
 import EmpyreanPower from './modules/talents/EmpyreanPower';
 import BuilderUse from './modules/core/BuilderUse';
@@ -26,17 +24,17 @@ import Guide from './Guide';
 import { MeleeUptimeAnalyzer } from 'interface/guide/foundation/analyzers/MeleeUptimeAnalyzer';
 import SPELLS from 'common/SPELLS';
 import Expurgation from './modules/talents/Expurgation';
-import WakeOfAshesNormalizer from './normalizers/WakeOfAshesNormalizer';
 import ExecutionSentence from './modules/talents/ExecutionSentence';
 import Lightbearer from '../shared/Lightbearer';
 import InstrumentOfRetribution from './modules/core/InstrumentOfRetribution';
+import RetributionEventLinkNormalizer from './normalizers/EventLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static guide = Guide;
 
   static specModules = {
     // Normalizers
-    wakeOfAshesNormalizer: WakeOfAshesNormalizer,
+    eventLinkNormalizer: RetributionEventLinkNormalizer,
 
     // Core
     builderUse: BuilderUse,
@@ -56,10 +54,9 @@ class CombatLogParser extends CoreCombatLogParser {
 
     // Talents
     executionSentence: ExecutionSentence,
-    divinePurpose: DivinePurpose,
     crusade: Crusade,
-    wakeofAshes: WakeOfAshes,
     hammerofWrath: HammerOfWrath,
+    divinePurpose: DivinePurpose,
     empyreanPower: EmpyreanPower,
     expurgation: Expurgation,
     lightBearer: Lightbearer,
@@ -68,9 +65,6 @@ class CombatLogParser extends CoreCombatLogParser {
     holyPowerTracker: HolyPowerTracker,
     holyPowerDetails: HolyPowerDetails,
     holyPowerPerMinute: HolyPowerPerMinute,
-
-    // Items
-    finalVerdict: FinalVerdict,
 
     meleeUptime: MeleeUptimeAnalyzer.withMeleeAbility(SPELLS.CRUSADING_STRIKES),
   };

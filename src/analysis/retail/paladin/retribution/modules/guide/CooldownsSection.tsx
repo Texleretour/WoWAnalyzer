@@ -4,7 +4,6 @@ import CooldownGraphSubsection, {
   Cooldown,
 } from 'interface/guide/components/CooldownGraphSubSection';
 import CombatLogParser from 'analysis/retail/paladin/retribution/CombatLogParser';
-import CooldownUsage from 'parser/core/MajorCooldowns/CooldownUsage';
 
 const cooldowns: Cooldown[] = [
   {
@@ -34,7 +33,6 @@ export default function CooldownsSection({ modules }: GuideProps<typeof CombatLo
         cooldown as soon as it becomes available (as long as it can do damage on target).
       </p>
       <CooldownGraphSubsection cooldowns={cooldowns} />
-      {<CooldownUsage analyzer={modules.wakeofAshes} title="Wake of Ashes" />}
       {modules.executionSentence.guideSubsection}
     </Section>
   );
