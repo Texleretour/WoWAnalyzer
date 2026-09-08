@@ -452,12 +452,12 @@ const spells = {
   DIVINE_PURPOSE_BUFF: {
     id: 223819,
     name: 'Divine Purpose',
-    icon: 'spell_holy_mindvision',
+    icon: 'spell_holy_divinepurpose',
   },
   DIVINE_PURPOSE_BUFF_RET: {
     id: 408458,
     name: 'Divine Purpose',
-    icon: 'spell_holy_mindvision',
+    icon: 'spell_holy_divinepurpose',
   },
   AVENGING_CRUSADER: {
     id: 216331,

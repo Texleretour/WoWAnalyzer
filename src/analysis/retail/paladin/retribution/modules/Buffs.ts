@@ -3,6 +3,7 @@ import BLOODLUST_BUFFS from 'game/BLOODLUST_BUFFS';
 import CoreAuras from 'parser/core/modules/Auras';
 import TALENTS from 'common/TALENTS/paladin';
 import { SpellbookAura } from 'parser/core/modules/Aura';
+import { TIERS } from 'game/TIERS';
 
 class Buffs extends CoreAuras {
   static dependencies = {
@@ -25,6 +26,11 @@ class Buffs extends CoreAuras {
       {
         spellId: SPELLS.ART_OF_WAR.id,
         enabled: combatant.hasTalent(TALENTS.ART_OF_WAR_TALENT),
+        timelineHighlight: true,
+      },
+      {
+        spellId: SPELLS.DIVINE_ARBITER_BUFF.id,
+        enabled: combatant.has4PieceByTier(TIERS.MID2),
         timelineHighlight: true,
       },
       // Throughput cooldowns

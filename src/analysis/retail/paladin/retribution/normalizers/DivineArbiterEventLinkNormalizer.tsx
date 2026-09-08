@@ -1,30 +1,29 @@
 import SPELLS from 'common/SPELLS';
 import { Options } from 'parser/core/Analyzer';
 import EventLinkNormalizer, { EventLink } from 'parser/core/EventLinkNormalizer';
-import {
-  ApplyBuffEvent,
-  CastEvent,
-  EventType,
-  GetRelatedEvents,
-  RefreshBuffEvent,
-} from 'parser/core/Events';
-import { TALENTS_PALADIN } from 'common/TALENTS';
+import { CastEvent, EventType, GetRelatedEvent, RemoveBuffEvent } from 'parser/core/Events';
+import { DAMAGE_HOLY_POWER_SPENDERS } from '../../shared/constants';
 
-const DIVINE_ARBITER_SOURCES = 'DivineArbiterSources';
+const DIVINE_PURPOSE_SPENDER = 'DivineArbiterSource';
+const DIVINE_ARBITER_PROC = 'DivineArbiterProc';
 
 const EVENT_LINKS: EventLink[] = [
   {
-    linkRelation: DIVINE_ARBITER_SOURCES,
-    // referencedEventId: DAMAGE_HOLY_POWER_SPENDERS.map(spender => spender.id),
-    referencedEventId: [
-      TALENTS_PALADIN.DIVINE_STORM_TALENT.id,
-      TALENTS_PALADIN.FINAL_VERDICT_TALENT.id,
-    ],
+    linkRelation: DIVINE_PURPOSE_SPENDER,
+    referencedEventId: DAMAGE_HOLY_POWER_SPENDERS.map((spender) => spender.id),
     referencedEventType: EventType.Cast,
-    linkingEventId: SPELLS.DIVINE_ARBITER_BUFF.id,
-    linkingEventType: [EventType.ApplyBuff, EventType.RefreshBuff],
-    backwardBufferMs: 2000,
-    forwardBufferMs: 2000,
+    linkingEventId: SPELLS.DIVINE_PURPOSE_BUFF_RET.id,
+    linkingEventType: EventType.RemoveBuff,
+    backwardBufferMs: 100,
+    anyTarget: true,
+  },
+  {
+    linkRelation: DIVINE_ARBITER_PROC,
+    referencedEventId: SPELLS.DIVINE_ARBITER_BUFF.id,
+    referencedEventType: EventType.ApplyBuff,
+    linkingEventId: SPELLS.DIVINE_PURPOSE_BUFF_RET.id,
+    linkingEventType: EventType.RemoveBuff,
+    forwardBufferMs: 100,
     anyTarget: true,
   },
 ];
@@ -35,10 +34,20 @@ export default class DivineArbiterEventLinkNormalizer extends EventLinkNormalize
   }
 }
 
-export function getDivineArbiterSource(event: ApplyBuffEvent | RefreshBuffEvent): CastEvent[] {
-  return GetRelatedEvents(
+export function getDivinePurposeSpender(event: RemoveBuffEvent): CastEvent | undefined {
+  return GetRelatedEvent(
     event,
-    DIVINE_ARBITER_SOURCES,
+    DIVINE_PURPOSE_SPENDER,
     (e): e is CastEvent => e.type === EventType.Cast,
+  );
+}
+
+export function hasDivineArbiterProcced(event: RemoveBuffEvent): boolean {
+  return (
+    GetRelatedEvent(
+      event,
+      DIVINE_ARBITER_PROC,
+      (e): e is CastEvent => e.type === EventType.ApplyBuff,
+    ) !== undefined
   );
 }
