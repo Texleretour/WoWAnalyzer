@@ -29,6 +29,8 @@ import ExecutionSentence from './modules/talents/ExecutionSentence';
 import Lightbearer from '../shared/Lightbearer';
 import InstrumentOfRetribution from './modules/core/InstrumentOfRetribution';
 import ArtOfWar from './modules/talents/ArtOfWar';
+import DivineArbiter from './modules/tierset/DivineArbiter';
+import DivineArbiterEventLinkNormalizer from './normalizers/DivineArbiterEventLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static guide = Guide;
@@ -41,6 +43,7 @@ class CombatLogParser extends CoreCombatLogParser {
 
     // Normalizers
     wakeOfAshesNormalizer: WakeOfAshesNormalizer,
+    divineArbiterEventLinkNormalizer: DivineArbiterEventLinkNormalizer,
 
     // Features
     abilities: Abilities,
@@ -62,6 +65,9 @@ class CombatLogParser extends CoreCombatLogParser {
     expurgation: Expurgation,
     executionSentence: ExecutionSentence,
     lightBearer: Lightbearer,
+
+    // Tier sets
+    divineArbiter: DivineArbiter,
 
     // HolyPower
     holyPowerTracker: HolyPowerTracker,

@@ -116,6 +116,7 @@ function CoreSection({ modules, info }: GuideProps<typeof CombatLogParser>) {
         <SubSection title="Buffs and debuffs">
           {modules.expurgation.guideSubsection}
           {modules.artOfWar.guideSubsection}
+          {modules.divineArbiter.guideSubsection}
         </SubSection>
       )}
     </Section>

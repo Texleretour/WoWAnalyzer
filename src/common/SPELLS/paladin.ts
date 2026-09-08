@@ -524,6 +524,12 @@ const spells = {
     name: 'Hammer of Wrath',
     icon: 'inv12_ability_paladin_hammerofwrath',
   },
+  DIVINE_ARBITER_BUFF: {
+    // MID2 4-Piece
+    id: 1306161,
+    name: 'Divine Arbiter',
+    icon: 'spell_holy_eyeforaneye',
+  },
 
   // Protection
   // GoAK has a different spell ID with Glyph of the Queen
